@@ -40,7 +40,13 @@ class PersonRow extends React.Component {
         data.append('surname', this.state.surname)
 
         axios.patch(this.props.url, data)
-        .then(() => this.props.fetchPeople())
+        .then(() => {
+            this.props.fetchPeople()
+            this.props.displayMessage("success", `Person of id=${this.props.id} has been updated.`)
+        })
+        .catch((e) => {
+            this.props.displayMessage("danger", `Person of id=${this.props.id} has not been updated.`)
+        })
 
     }
 
@@ -54,7 +60,14 @@ class PersonRow extends React.Component {
         const axios = require('axios')
 
         axios.delete(this.props.url)
-        .then(() => this.props.fetchPeople())
+        .then(() => {
+            this.props.fetchPeople()
+            this.props.displayMessage("success", `Person of id=${this.props.id} has been deleted.`)
+        })
+        .catch((e) => {
+            this.props.displayMessage("danger", `Person of id=${this.props.id} has not been deleted.`)
+        })
+
     }
 }
 

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Form, Row, Col, Table, Container, Button } from 'react-bootstrap'
+import { Alert, Form, Row, Col, Table, Container, Button } from 'react-bootstrap'
 import PersonRow from './person-row/PersonRow.js'
 import './Census.css';
 
@@ -12,6 +12,9 @@ class Census extends React.Component {
             name: "",
             surname: "",
             person_list: [],
+            alert_variant: "",
+            alert_message: "",
+            alert_show: false
         }
     }
 
@@ -20,7 +23,16 @@ class Census extends React.Component {
     }
 
     render() {
+        let alert;
+        if (this.state.alert_show) {
+            alert = <Alert variant={this.state.alert_variant} dismissible onClose={() => this.setState({alert_show: false})}><p>{this.state.alert_message}</p></Alert> 
+        }
         return (
+            <Container>
+            <Container>
+            {alert}
+            </Container>
+
             <Container>
             <Form>
             <Row>
@@ -46,13 +58,22 @@ class Census extends React.Component {
                 </thead>
                 <tbody>
                     {this.state.person_list.map((person, i) => 
-                        <PersonRow key={i} id={person.id} name={person.name} surname={person.surname} url={person.url} fetchPeople={this.fetchPeople}/>
+                        <PersonRow key={i} id={person.id} name={person.name} surname={person.surname} url={person.url} fetchPeople={this.fetchPeople} displayMessage={this.displayMessage}/>
                     )}
                 </tbody>
             </Table>
             </Container>
+            </Container>
 
         )
+    }
+
+    displayMessage = (variant, message) => {
+        this.setState({
+            alert_variant: variant,
+            alert_message: message,
+            alert_show: true
+        })
     }
 
     fetchPeople = () => {
@@ -64,8 +85,11 @@ class Census extends React.Component {
                 person_list: response.data
             })
 
+
         })
-        console.log(this.state.person_list)
+        .catch((e) => {
+            this.displayMessage("danger", "Could not connect to the database :(.")
+        })
     }
 
     handleChange = (event) => {
@@ -87,7 +111,11 @@ class Census extends React.Component {
 
             axios.post('http://127.0.0.1:8000/person/', data)
             .then(() => {
+                this.displayMessage("success", "Person has been succesfully added.")
                 this.fetchPeople()
+            })
+            .catch((e) => {
+                this.displayMessage("danger", "Could not add new person to the database, try again later.")
             })
 
         }
